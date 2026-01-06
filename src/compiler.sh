@@ -1,2 +1,2 @@
-gcc main.c lexer.c -o out
+gcc main.c paren_checker.c -o out
 ./out

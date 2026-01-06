@@ -1,6 +1,6 @@
 /* This a comment */
 /* Everything is working fine */
-int main(){
+int main({
     int x = 1000; // This is a comment
     int y = 10;
     int z = x+y;

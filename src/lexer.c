@@ -29,12 +29,38 @@ void print_lex(FILE *file) {
     temp[0] = '\0';
 
     while ((ch = fgetc(file)) != EOF) {
+        if (ch == '/'){
+            ch = fgetc(file);
+            if (ch == '/'){
+                while((ch = fgetc(file)) != EOF){
+                    if (ch == '\n') break;
+                    ch = fgetc(file);
+                }
+            }
+            else if (ch == '*'){
+                while((ch = fgetc(file)) != EOF){
+                    if (ch == '*') break;
+                    ch = fgetc(file);
+                }
+                ch = fgetc(file);
+            }
+        }
 
         if (isalpha((unsigned char)ch)) {
             if (i < sizeof(temp) - 1) {
                 temp[i++] = ch;
                 temp[i] = '\0';
             }
+        }
+        else if (isdigit(ch)){
+            int num = 0;
+            while(isdigit(ch) && ch >= '0' && ch <= '9'){
+                num *= 10;
+                num += (ch - '0');
+                ch = fgetc(file);
+            }
+            printf("Number Value Found: %d\n", num);
+            if (ch != EOF) ungetc(ch, file);
         }
         else {
             if (i > 0) {
@@ -54,7 +80,7 @@ void print_lex(FILE *file) {
                     printf("Comparator Operator: ==\n");
                 }
                 else {
-                    printf("Assignment operator: %c\n", next);
+                    printf("Assignment operator: %c\n", ch);
                     ungetc(next, file);
                 }
             }

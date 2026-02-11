@@ -1,15 +1,19 @@
 #include <stdio.h>
-#include "lexer.h"
-#include "paren_checker.h"
+#include "include/lexer.h"
 
-int main(){
-    FILE *fp = fopen("sample.tac", "r");
-    if (!fp){
-        perror("fopen");
-        return 1;
-    }
-    //print_lex(fp);
-    check_paren(fp);
-    fclose(fp);
-    return 0;
+int main(int argc, char* argv[])
+{
+  lexer_T* lexer = init_lexer(
+    "var name = \"Gautam\";\n"
+    "print(name);\n"
+  );
+
+  token_T* token = (void*)0;
+
+  while((token = lexer_get_next_token(lexer)) != (void*)0)
+  {
+    printf("TOKEN(%d, %s)\n", token->type, token->value);
+  }
+
+  return 0;
 }

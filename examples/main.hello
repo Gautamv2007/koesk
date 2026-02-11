@@ -1,0 +1,3 @@
+var name = "Gautam";
+var name = "hello";
+print(name);

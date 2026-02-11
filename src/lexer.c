@@ -1,130 +1,108 @@
-#include <stdio.h>
-#include <stdbool.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
+#include "include/lexer.h"
 #include <ctype.h>
+#include <stdio.h>
 
-#include "lexer.h"
+lexer_T* init_lexer(char *contents)
+{
+  lexer_T* lexer = calloc(1, sizeof(struct LEXER_STRUCT));  
+  lexer->contents = contents;
+  lexer->i = 0;
+  lexer->c = contents[lexer->i];
 
-bool check_keyword(char ch[]){
-    if (strcmp(ch, "if") == 0) return true;
-    else if (strcmp(ch, "while") == 0) return true;
-    else if (strcmp(ch, "for") == 0) return true;
-    else if (strcmp(ch, "else") == 0) return true;
-    else if (strcmp(ch, "elif") == 0) return true;
-    else if (strcmp(ch, "int") == 0) return true;
-    else if (strcmp(ch, "main") == 0) return true;
-    return false;
+  return lexer;
 }
 
-void print_lex(FILE *file) {
-    if (!file) {
-        perror("File open failed");
-        return;
+
+void lexer_advance(lexer_T* lexer) //This jumps to the next character 
+{
+  if (lexer->c != '\0' && lexer->i < strlen(lexer->contents))
+  {
+    lexer->i += 1;
+    lexer->c = lexer->contents[lexer->i];
+  }    
+}
+void lexer_skip_whitespace(lexer_T* lexer)
+{
+  while(lexer->c ==  ' ' || lexer->c == 10) // 10 is actually the code for newline
+  {
+    lexer_advance(lexer);
+  }
+}
+
+token_T* lexer_get_next_token(lexer_T* lexer)
+{
+  while(lexer->c != '\0' && lexer->i < strlen(lexer->contents))
+  {
+    if(lexer->c ==  ' ' || lexer->c == 10)
+      lexer_skip_whitespace(lexer);
+
+    if(isalnum(lexer->c))
+      return lexer_collect_id(lexer);
+    if (lexer->c == '"')
+    {
+      return lexer_collect_string(lexer);
     }
-
-    char temp[50];
-    int ch;
-    int i = 0;
-    temp[0] = '\0';
-
-    while ((ch = fgetc(file)) != EOF) {
-        if (ch == '/'){
-            ch = fgetc(file);
-            if (ch == '/'){
-                while((ch = fgetc(file)) != EOF){
-                    if (ch == '\n') break;
-                    ch = fgetc(file);
-                }
-            }
-            else if (ch == '*'){
-                while((ch = fgetc(file)) != EOF){
-                    if (ch == '*') break;
-                    ch = fgetc(file);
-                }
-                ch = fgetc(file);
-            }
-        }
-
-        if (isalpha((unsigned char)ch)) {
-            if (i < sizeof(temp) - 1) {
-                temp[i++] = ch;
-                temp[i] = '\0';
-            }
-        }
-        else if (isdigit(ch)){
-            int num = 0;
-            while(isdigit(ch) && ch >= '0' && ch <= '9'){
-                num *= 10;
-                num += (ch - '0');
-                ch = fgetc(file);
-            }
-            printf("Number Value Found: %d\n", num);
-            if (ch != EOF) ungetc(ch, file);
-        }
-        else {
-            if (i > 0) {
-                if (check_keyword(temp)) {
-                    printf("Keyword Found: %s\n", temp);
-                }
-                else {
-                    printf("Identifier Found: %s\n", temp);
-                }
-                i = 0;
-                temp[0] = '\0';
-            }
-
-            if (ch == '=') {
-                int next = fgetc(file);
-                if (next == '='){
-                    printf("Comparator Operator: ==\n");
-                }
-                else {
-                    printf("Assignment operator: %c\n", ch);
-                    ungetc(next, file);
-                }
-            }
-            else if (ch == '<' || ch == '>'){
-                int next = fgetc(file);
-                if (next == '='){
-                    printf("Comparator Operator: %c=\n", next);
-                }
-                else {
-                    printf("Comparator Operator: %c\n", ch);
-                    ungetc(next, file);
-                }
-            }
-            else if (ch == ';'){
-                printf("Semicolon Found: ;\n");
-            }
-            else if (ch == '{'){
-                printf("Open curly brackets Found: {\n");
-            }
-            else if (ch == '}'){
-                printf("Closed curly brackets Found: }\n");
-            }
-            else if (ch == '('){
-                printf("Open Paren Found: (\n");
-            }
-            else if (ch == ')'){
-                printf("Closed Paren Found: )\n");
-            }
-            else if (ch == '"'){
-                char output[100];
-                output[0] = ch;
-                ch = fgetc(file);
-                int j = 1;
-                while(ch != EOF && ch != '"'){
-                    output[j++] = ch;
-                    ch = fgetc(file);
-                }
-                output[j++] = '"';
-                output[j] = '\0';
-                printf("String Found: %s\n", output);
-            }
-        }
+    switch(lexer->c)
+    {
+      case '=': return lexer_advance_with_token(lexer, init_token(TOKEN_EQUALS, lexer_get_current_char_as_string(lexer))); break;
+      case '(': return lexer_advance_with_token(lexer, init_token(TOKEN_LPAREN, lexer_get_current_char_as_string(lexer))); break;
+      case ')': return lexer_advance_with_token(lexer, init_token(TOKEN_RPAREN, lexer_get_current_char_as_string(lexer))); break;
+      case ';': return lexer_advance_with_token(lexer, init_token(TOKEN_SEMI, lexer_get_current_char_as_string(lexer))); break;
     }
-    if (i > 0 && check_keyword(temp)) {
-        printf("Keyword Found: %s\n", temp);
-    }
+  }
+
+  return (void*)0;
+}  
+
+token_T* lexer_collect_string(lexer_T* lexer)
+{
+  lexer_advance(lexer);
+  char* value = calloc(1, sizeof(char));
+  value[0] = '\0';
+  while(lexer->c != '"')
+  {
+    char* s = lexer_get_current_char_as_string(lexer);
+    value = realloc(value, (strlen(value) + strlen(s) + 1) * sizeof(char));
+    strcat(value, s);
+
+    lexer_advance(lexer);
+  }
+
+  lexer_advance(lexer);
+  return init_token(TOKEN_STRING, value);
+}
+
+token_T* lexer_collect_id(lexer_T* lexer)
+{
+  char* value = calloc(1, sizeof(char));
+  value[0] = '\0';
+  while(isalnum(lexer->c))
+  {
+    char* s = lexer_get_current_char_as_string(lexer);
+    value = realloc(value, (strlen(value) + strlen(s) + 1) * sizeof(char));
+    strcat(value, s);
+
+    lexer_advance(lexer);
+  }
+
+  return init_token(TOKEN_STRING, value);
+}
+
+token_T* lexer_advance_with_token(lexer_T* lexer, token_T* token)
+{
+  lexer_advance(lexer);
+  return token;
+}
+
+
+
+char* lexer_get_current_char_as_string(lexer_T* lexer)
+{
+  char *str = calloc(2, sizeof(char));
+  str[0] = lexer->c;
+  str[1] = '\0';
+
+  return str;
 }

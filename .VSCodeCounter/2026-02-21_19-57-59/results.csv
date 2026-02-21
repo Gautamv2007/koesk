@@ -1,0 +1,7 @@
+"filename", "language", "C++", "comment", "blank", "total"
+"/home/gautam/koesk/src/include/AST.h", "C++", 24, 5, 7, 36
+"/home/gautam/koesk/src/include/lexer.h", "C++", 18, 0, 10, 28
+"/home/gautam/koesk/src/include/main.h", "C++", 0, 0, 1, 1
+"/home/gautam/koesk/src/include/parser.h", "C++", 21, 1, 14, 36
+"/home/gautam/koesk/src/include/token.h", "C++", 17, 0, 2, 19
+"Total", "-", 80, 6, 34, 120

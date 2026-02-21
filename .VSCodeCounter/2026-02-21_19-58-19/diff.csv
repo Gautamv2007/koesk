@@ -1,0 +1,7 @@
+"filename", "language", "C", "comment", "blank", "total"
+"/home/gautam/koesk/src/AST.C", "C", 16, 5, 7, 28
+"/home/gautam/koesk/src/lexer.c", "C", 90, 0, 19, 109
+"/home/gautam/koesk/src/main.c", "C", 15, 0, 5, 20
+"/home/gautam/koesk/src/parser.c", "C", 51, 0, 17, 68
+"/home/gautam/koesk/src/token.c", "C", 9, 0, 4, 13
+"Total", "-", 181, 5, 52, 238

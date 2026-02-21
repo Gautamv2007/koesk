@@ -4,7 +4,7 @@
 int main(int argc, char* argv[])
 {
   lexer_T* lexer = init_lexer(
-    "var name = \"Gautam\";\n"
+    "var name = \"gautam\";\n"
     "print(name);\n"
   );
 

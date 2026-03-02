@@ -5,7 +5,7 @@ typedef struct AST_STRUCT
 {
     enum {
         AST_VARIABLE,
-        AST_DEFINITION_VARIABLE,
+        AST_VARIABLE_DEFINITION,
         AST_FUNCTION_CALL,
         AST_STRING,
         AST_COMPOUND // this is a list of multiple statements
@@ -29,7 +29,6 @@ typedef struct AST_STRUCT
     /*AST_COMPOUND*/
     struct AST_STRUCT** compound_value;
     size_t compound_size;
-
 } AST_T;
 
 AST_T* init_ast(int type);
